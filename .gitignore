@@ -1,0 +1,10 @@
+# Terraform local state
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# .terraform dir
+.terraform/
+
+# Crash logs
+crash.log
