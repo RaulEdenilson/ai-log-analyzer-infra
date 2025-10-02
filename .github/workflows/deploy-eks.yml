@@ -1,0 +1,50 @@
+name: Deploy to EKS
+
+on:
+  workflow_run:
+    workflows: ["Build and Deploy to ECR"]
+    types:
+      - completed
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: ai-logs-eks
+
+jobs:
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+    
+    - name: Deploy to EKS
+      run: |
+        # Update image in deployment
+        sed -i "s|625512666928.dkr.ecr.us-east-1.amazonaws.com/ai-log-analyzer:latest|625512666928.dkr.ecr.us-east-1.amazonaws.com/ai-log-analyzer:${{ github.sha }}|g" k8s-deployment.yaml
+        
+        # Apply deployment
+        kubectl apply -f k8s-deployment.yaml
+        
+        # Wait for deployment to be ready
+        kubectl rollout status deployment/ai-log-analyzer --timeout=300s
+        
+        # Get service info
+        kubectl get services ai-log-analyzer-service
