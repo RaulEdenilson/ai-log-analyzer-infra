@@ -1,0 +1,19 @@
+region        = "us-east-1"
+cluster_name  = "ai-logs-eks"
+
+github_org    = "TU_ORG"           # ej. "bootcamp-latam"
+github_repo   = "ai-log-analyzer"  # ej. tu repo de app
+
+# Si quieres permitir más ramas/workflows, define:
+# github_oidc_subjects = [
+#   "repo:TU_ORG/ai-log-analyzer:ref:refs/heads/main",
+#   "repo:TU_ORG/ai-log-analyzer:ref:refs/heads/dev"
+# ]
+
+node_group_desired  = 2
+node_instance_types = ["t3.medium"]
+
+tags = {
+  Environment = "bootcamp"
+  Owner       = "tu-nombre"
+}
