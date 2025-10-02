@@ -94,6 +94,16 @@ data "aws_iam_policy_document" "ecr_push" {
     ]
     resources = [aws_ecr_repository.this.arn]
   }
+
+  # EKS permissions for deployment
+  statement {
+    effect = "Allow"
+    actions = [
+      "eks:DescribeCluster",
+      "eks:ListClusters"
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role_policy" "ecr_push_inline" {

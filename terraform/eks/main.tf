@@ -73,9 +73,9 @@ module "eks" {
       }
     }
     
-    # Access entry para GitHub Actions
+    # Access entry para GitHub Actions (usando el rol de ECR)
     github_actions_deploy = {
-      principal_arn = aws_iam_role.github_actions_deploy.arn
+      principal_arn = "arn:aws:iam::${var.account_id}:role/GitHubActions-ECRPush"
 
       policy_associations = {
         admin = {
